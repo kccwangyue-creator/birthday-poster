@@ -3,142 +3,285 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <!-- 飞书多维表 JS SDK -->
   <script src="https://unpkg.com/@lark-base-open/js-sdk@latest/dist/index.js"></script>
+
   <title>生日海报生成器</title>
+
   <style>
     body {
-      font-family: Arial, sans-serif;
+      font-family: Arial, "PingFang SC", "Microsoft YaHei", sans-serif;
       padding: 20px;
       background: #f5f5f5;
+      margin: 0;
     }
+
     h2 {
       margin-bottom: 16px;
     }
+
     .controls {
       margin-bottom: 16px;
     }
-    input, button {
+
+    input,
+    button {
       padding: 10px 12px;
       font-size: 14px;
       margin-right: 8px;
+      margin-bottom: 8px;
     }
+
     canvas {
       max-width: 100%;
+      height: auto;
       border: 1px solid #ddd;
       background: white;
+      display: block;
     }
+
     #downloadLink {
       display: none;
       margin-top: 12px;
     }
   </style>
 </head>
+
 <body>
   <h2>生日海报生成器</h2>
 
   <div class="controls">
-    <input id="nameInput" type="text" placeholder="请输入员工姓名" />
-    <button id="readNameBtn">读取当前行姓名</button>
-    <button id="generateBtn">生成海报</button>
+    <input
+      id="nameInput"
+      type="text"
+      placeholder="请输入员工姓名"
+    />
+
+    <button id="readNameBtn">
+      读取当前行姓名
+    </button>
+
+    <button id="generateBtn">
+      生成海报
+    </button>
   </div>
 
-  <canvas id="posterCanvas" width="1242" height="2208"></canvas>
-  <br />
-  <a id="downloadLink" download="birthday-poster.png">下载海报</a>
+  <canvas
+    id="posterCanvas"
+    width="1242"
+    height="2208"
+  ></canvas>
+
+  <a
+    id="downloadLink"
+    download="birthday-poster.png"
+  >
+    下载海报
+  </a>
 
   <script>
+    // =========================
+    // 获取页面元素
+    // =========================
     const canvas = document.getElementById("posterCanvas");
     const ctx = canvas.getContext("2d");
-    const generateBtn = document.getElementById("generateBtn");
-    const nameInput = document.getElementById("nameInput");
-    const downloadLink = document.getElementById("downloadLink");
-    const readNameBtn = document.getElementById("readNameBtn");
 
+    const nameInput = document.getElementById("nameInput");
+    const readNameBtn = document.getElementById("readNameBtn");
+    const generateBtn = document.getElementById("generateBtn");
+    const downloadLink = document.getElementById("downloadLink");
+
+    // =========================
+    // 加载生日海报模板
+    // =========================
     const templateImg = new Image();
     templateImg.src = "./template.jpg";
 
+    // =========================
+    // 生成生日海报
+    // =========================
     function drawPoster(name) {
-      console.log("开始绘制", templateImg.naturalWidth, templateImg.naturalHeight);
-
       if (!templateImg.naturalWidth || !templateImg.naturalHeight) {
-        alert("模板图片没有加载成功，请检查 template.jpg 文件名是否正确");
+        alert("模板图片没有加载成功，请检查 template.jpg 文件是否存在");
         return;
       }
 
+      // 使用模板原始尺寸
       canvas.width = templateImg.naturalWidth;
       canvas.height = templateImg.naturalHeight;
 
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-      ctx.drawImage(templateImg, 0, 0);
+      // 清空画布
+      ctx.clearRect(
+        0,
+        0,
+        canvas.width,
+        canvas.height
+      );
 
+      // 画底图
+      ctx.drawImage(
+        templateImg,
+        0,
+        0
+      );
+
+      // =========================
+      // 姓名样式
+      // =========================
       ctx.fillStyle = "#8A0AA5";
-      ctx.font = 'bold 60px "PingFang SC", "Microsoft YaHei", sans-serif';
+
+      ctx.font =
+        'bold 60px "PingFang SC", "Microsoft YaHei", sans-serif';
+
       ctx.textAlign = "left";
       ctx.textBaseline = "middle";
 
-      ctx.fillText(name, 352, 1047);
+      // 姓名位置
+      ctx.fillText(
+        name,
+        352,
+        1047
+      );
 
-      const url = canvas.toDataURL("image/png");
-      downloadLink.href = url;
+      // 生成可下载图片
+      const imageUrl = canvas.toDataURL("image/png");
+
+      downloadLink.href = imageUrl;
       downloadLink.style.display = "inline-block";
     }
 
+    // =========================
+    // 模板加载成功
+    // =========================
     templateImg.onload = function () {
-      console.log("图片加载成功");
+      console.log(
+        "模板加载成功：",
+        templateImg.naturalWidth,
+        templateImg.naturalHeight
+      );
+
+      // 默认先展示一个测试姓名
       drawPoster("王玥");
     };
 
+    // =========================
+    // 模板加载失败
+    // =========================
     templateImg.onerror = function () {
-      alert("template.jpg 加载失败，请检查 GitHub 仓库里的文件名是不是完全叫 template.jpg");
+      alert(
+        "template.jpg 加载失败，请确认 GitHub 仓库中的图片文件名完全是 template.jpg"
+      );
     };
 
-    generateBtn.addEventListener("click", () => {
-      const name = nameInput.value.trim() || "王玥";
-      drawPoster(name);
-    });
+    // =========================
+    // 手动生成海报
+    // =========================
+    generateBtn.addEventListener(
+      "click",
+      function () {
+        const name =
+          nameInput.value.trim() || "王玥";
 
-    readNameBtn.addEventListener("click", async () => {
-  try {
-    const { bitable } = window.larkBase;
-
-    const selection = await bitable.base.getSelection();
-
-    if (!selection.recordId) {
-      alert("请先在多维表里点中一条记录");
-      return;
-    }
-
-    const table = await bitable.base.getActiveTable();
-
-    const nameField = await table.getFieldByName("姓名");
-
-    const name = await table.getCellString(
-      nameField.id,
-      selection.recordId
+        drawPoster(name);
+      }
     );
 
-    nameInput.value = name || "";
+    // =========================
+    // 从飞书多维表读取当前行姓名
+    // =========================
+    readNameBtn.addEventListener(
+      "click",
+      async function () {
+        try {
+          // 判断飞书 SDK 是否成功加载
+          if (
+            !window.larkBase ||
+            !window.larkBase.bitable
+          ) {
+            alert(
+              "飞书 JS SDK 没有成功加载"
+            );
+            return;
+          }
 
-    if (!name) {
-      alert("当前记录的姓名为空");
-    }
+          const { bitable } =
+            window.larkBase;
 
-  } catch (err) {
-    console.error("读取姓名失败：", err);
-    alert("读取姓名失败：" + (err?.message || err));
-  }
-});
+          // 获取当前选中的记录
+          const selection =
+            await bitable.base.getSelection();
 
-        nameInput.value = name;
+          console.log(
+            "当前选中记录：",
+            selection
+          );
 
-        if (!name) {
-          alert("当前记录的姓名为空");
+          if (
+            !selection ||
+            !selection.recordId
+          ) {
+            alert(
+              "请先在多维表里点击某一行的姓名单元格"
+            );
+            return;
+          }
+
+          // 获取当前表
+          const table =
+            await bitable.base.getActiveTable();
+
+          // 获取「姓名」字段
+          const nameField =
+            await table.getFieldByName(
+              "姓名"
+            );
+
+          if (!nameField) {
+            alert(
+              "没有找到名为「姓名」的字段，请确认字段名称完全一致"
+            );
+            return;
+          }
+
+          // 读取当前记录里的姓名
+          const name =
+            await table.getCellString(
+              nameField.id,
+              selection.recordId
+            );
+
+          console.log(
+            "读取到的姓名：",
+            name
+          );
+
+          if (!name) {
+            alert(
+              "当前记录的姓名为空"
+            );
+            return;
+          }
+
+          // 自动填入输入框
+          nameInput.value = name;
+
+          // 顺便直接生成海报
+          drawPoster(name);
+
+        } catch (err) {
+          console.error(
+            "读取姓名失败：",
+            err
+          );
+
+          alert(
+            "读取姓名失败：" +
+            (err?.message || String(err))
+          );
         }
-      } catch (err) {
-        console.error(err);
-        alert("读取姓名失败，请打开控制台查看错误");
       }
-    });
+    );
   </script>
 </body>
 </html>
