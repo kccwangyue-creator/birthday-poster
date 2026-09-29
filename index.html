@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
+<script src="https://unpkg.com/@lark-base-open/js-sdk@latest/dist/index.js"></script>
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -37,9 +38,10 @@
   <h2>生日海报生成器</h2>
 
   <div class="controls">
-    <input id="nameInput" type="text" placeholder="请输入员工姓名" />
-    <button id="generateBtn">生成海报</button>
-  </div>
+  <input id="nameInput" type="text" placeholder="请输入员工姓名" />
+  <button id="readNameBtn">读取当前行姓名</button>
+  <button id="generateBtn">生成海报</button>
+</div>
 
   <canvas id="posterCanvas" width="1242" height="2208"></canvas>
   <br />
@@ -51,7 +53,7 @@
   const generateBtn = document.getElementById("generateBtn");
   const nameInput = document.getElementById("nameInput");
   const downloadLink = document.getElementById("downloadLink");
-
+  const readNameBtn = document.getElementById("readNameBtn");
   const templateImg = new Image();
   templateImg.src = "./template.jpg";
 
@@ -101,6 +103,43 @@
     const name = nameInput.value.trim() || "王玥";
     drawPoster(name);
   });
+  readNameBtn.addEventListener("click", async () => {
+  try {
+    const { bitable } = window.larkBase;
+
+    const table = await bitable.base.getActiveTable();
+    const selection = await bitable.base.getSelection();
+
+    const recordId = selection.recordId;
+
+    if (!recordId) {
+      alert("请先在多维表里选中一条记录");
+      return;
+    }
+
+    const nameField = await table.getFieldByName("姓名");
+    const value = await nameField.getValue(recordId);
+
+    let name = "";
+
+    if (Array.isArray(value)) {
+      name = value.map(item => item.text || item.name || "").join("");
+    } else if (typeof value === "string") {
+      name = value;
+    } else if (value && value.text) {
+      name = value.text;
+    }
+
+    nameInput.value = name;
+
+    if (!name) {
+      alert("当前记录的姓名为空");
+    }
+  } catch (err) {
+    console.error(err);
+    alert("读取姓名失败，请打开控制台查看错误");
+  }
+});
 </script>
 </body>
 </html>
