@@ -98,31 +98,36 @@
     });
 
     readNameBtn.addEventListener("click", async () => {
-      try {
-        const { bitable } = window.larkBase;
+  try {
+    const { bitable } = window.larkBase;
 
-        const table = await bitable.base.getActiveTable();
-        const selection = await bitable.base.getSelection();
+    const selection = await bitable.base.getSelection();
 
-        const recordId = selection.recordId;
+    if (!selection.recordId) {
+      alert("请先在多维表里点中一条记录");
+      return;
+    }
 
-        if (!recordId) {
-          alert("请先在多维表里选中一条记录");
-          return;
-        }
+    const table = await bitable.base.getActiveTable();
 
-        const nameField = await table.getFieldByName("姓名");
-        const value = await nameField.getValue(recordId);
+    const nameField = await table.getFieldByName("姓名");
 
-        let name = "";
+    const name = await table.getCellString(
+      nameField.id,
+      selection.recordId
+    );
 
-        if (Array.isArray(value)) {
-          name = value.map(item => item.text || item.name || "").join("");
-        } else if (typeof value === "string") {
-          name = value;
-        } else if (value && value.text) {
-          name = value.text;
-        }
+    nameInput.value = name || "";
+
+    if (!name) {
+      alert("当前记录的姓名为空");
+    }
+
+  } catch (err) {
+    console.error("读取姓名失败：", err);
+    alert("读取姓名失败：" + (err?.message || err));
+  }
+});
 
         nameInput.value = name;
 
