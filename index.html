@@ -56,13 +56,22 @@
   templateImg.src = "./template.jpg";
 
   function drawPoster(name) {
-    // 让 canvas 自动使用原图尺寸，不再拉伸
+    console.log("开始绘制", templateImg.naturalWidth, templateImg.naturalHeight);
+
+    // 如果图片没加载成功，直接不继续
+    if (!templateImg.naturalWidth || !templateImg.naturalHeight) {
+      alert("模板图片没有加载成功，请检查 template.jpg 文件名是否正确");
+      return;
+    }
+
+    // 让 canvas 使用原图尺寸
     canvas.width = templateImg.naturalWidth;
     canvas.height = templateImg.naturalHeight;
 
-    ctx.clearRect(0, 0);
+    // 清空画布
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-    // 按原尺寸画图
+    // 画底图
     ctx.drawImage(templateImg, 0, 0);
 
     // 名字样式
@@ -80,7 +89,12 @@
   }
 
   templateImg.onload = function () {
+    console.log("图片加载成功");
     drawPoster("王玥");
+  };
+
+  templateImg.onerror = function () {
+    alert("template.jpg 加载失败，请检查 GitHub 仓库里的文件名是不是完全叫 template.jpg");
   };
 
   generateBtn.addEventListener("click", () => {
