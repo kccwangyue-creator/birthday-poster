@@ -45,42 +45,48 @@
   <br />
   <a id="downloadLink" download="birthday-poster.png">下载海报</a>
 
-  <script>
-    const canvas = document.getElementById("posterCanvas");
-    const ctx = canvas.getContext("2d");
-    const generateBtn = document.getElementById("generateBtn");
-    const nameInput = document.getElementById("nameInput");
-    const downloadLink = document.getElementById("downloadLink");
+<script>
+  const canvas = document.getElementById("posterCanvas");
+  const ctx = canvas.getContext("2d");
+  const generateBtn = document.getElementById("generateBtn");
+  const nameInput = document.getElementById("nameInput");
+  const downloadLink = document.getElementById("downloadLink");
 
-    const templateImg = new Image();
-    templateImg.src = "./template.jpg"; // 如果你的文件是 jpg，就改成 ./template.jpg
+  const templateImg = new Image();
+  templateImg.src = "./template.jpg";
 
-    function drawPoster(name) {
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
+  function drawPoster(name) {
+    // 让 canvas 自动使用原图尺寸，不再拉伸
+    canvas.width = templateImg.naturalWidth;
+    canvas.height = templateImg.naturalHeight;
 
-      ctx.drawImage(templateImg, 0, 0, canvas.width, canvas.height);
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-      ctx.fillStyle = "#FFFFFF";
-      ctx.font = "bold 72px sans-serif";
-      ctx.textAlign = "center";
-      ctx.textBaseline = "middle";
+    // 按原尺寸画图
+    ctx.drawImage(templateImg, 0, 0);
 
-      // 名字位置，后面我们可以再调
-      ctx.fillText(name, 540, 900);
+    // 名字样式
+    ctx.fillStyle = "#8A0AA5";
+    ctx.font = 'bold 52px "PingFang SC", "Microsoft YaHei", sans-serif';
+    ctx.textAlign = "left";
+    ctx.textBaseline = "middle";
 
-      const url = canvas.toDataURL("image/png");
-      downloadLink.href = url;
-      downloadLink.style.display = "inline-block";
-    }
+    // 名字位置
+    ctx.fillText(name, 490, 255);
 
-    templateImg.onload = function () {
-      drawPoster("王玥");
-    };
+    const url = canvas.toDataURL("image/png");
+    downloadLink.href = url;
+    downloadLink.style.display = "inline-block";
+  }
 
-    generateBtn.addEventListener("click", () => {
-      const name = nameInput.value.trim() || "王玥";
-      drawPoster(name);
-    });
-  </script>
+  templateImg.onload = function () {
+    drawPoster("王玥");
+  };
+
+  generateBtn.addEventListener("click", () => {
+    const name = nameInput.value.trim() || "王玥";
+    drawPoster(name);
+  });
+</script>
 </body>
 </html>
